@@ -21,8 +21,9 @@ julia = "1.10"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Reseau = "802f3686-a58f-41ce-bb0c-3c43c75bba36"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "Test", "Reseau"]
+test = ["Aqua", "Random", "Reseau", "Test"]

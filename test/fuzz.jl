@@ -6,12 +6,18 @@ using Random
 if !isdefined(Main, :ListsSchema)
     if !Sys.iswindows()
         run(`capnpc -o./capnpc-jl test/lists.capnp`)
+        run(`capnpc -o./capnpc-jl test/elementary.capnp`)
     else
         run(pipeline(`capnp compile -o- test/lists.capnp`, `julia --project capnpc-jl`))
+        run(pipeline(`capnp compile -o- test/elementary.capnp`, `julia --project capnpc-jl`))
     end
 
     @eval module ListsSchema
     include("lists.capnp.jl")
+    end
+
+    @eval module ElementarySchema
+    include("elementary.capnp.jl")
     end
 end
 
