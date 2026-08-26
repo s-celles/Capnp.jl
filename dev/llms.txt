@@ -1,23 +1,13 @@
 # Capnp.jl
 
-Capnp.jl is a Julia package that implements Cap'n Proto data serialization and RPC.
-It provides zero-copy serialization and deserialization of Cap'n Proto messages, leveraging native Julia structures.
-
-## Key Features
-- Zero-copy deserialization: Data is read directly from memory buffers without allocation overhead.
-- Native compiler plugin (`capnpc-jl`): Generates Julia code from `.capnp` schema files.
-- Cap'n Proto RPC (Experimental): Partial support for the Cap'n Proto RPC protocol.
+> Cap'n Proto data serialization and RPC for Julia: zero-copy reads straight out of message buffers, a native `capnpc-jl` compiler plugin that turns `.capnp` schemas into Julia code, and experimental support for the Cap'n Proto RPC protocol.
 
 ## Documentation
 - [Home](https://s-celles.github.io/Capnp.jl/dev/)
-- [Source Code](https://github.com/s-celles/Capnp.jl)
+- [Supported functionality](https://s-celles.github.io/Capnp.jl/dev/support/)
+- [Serialization](https://s-celles.github.io/Capnp.jl/dev/api/)
+- [RPC types](https://s-celles.github.io/Capnp.jl/dev/rpc/)
+- [RPC functions](https://s-celles.github.io/Capnp.jl/dev/rpc-functions/)
 
-## Usage Example
-```julia
-using Capnp
-include("schema.capnp.jl")
-
-message = Capnp.AllocMessageBuilder()
-# populate message...
-Capnp.writeMessageToStream(message, stdout)
-```
+## Other
+- [Source code](https://github.com/s-celles/Capnp.jl)
