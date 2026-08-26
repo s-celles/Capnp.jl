@@ -77,7 +77,18 @@ struct ConnectionOptions
     max_exports::Int
     max_imports::Int
 
-    function ConnectionOptions(; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT, inbound_queue_size::Int = 64, outbound_queue_size::Int = 64, max_questions::Int = 1024, max_answers::Int = 1024, max_exports::Int = 8192, max_imports::Int = 8192)
+    function ConnectionOptions(;
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+        inbound_queue_size::Int = 64,
+        outbound_queue_size::Int = 64,
+        max_questions::Int = 1024,
+        max_answers::Int = 1024,
+        max_exports::Int = 8192,
+        max_imports::Int = 8192,
+    )
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
         _validate_connection_limits(inbound_queue_size, outbound_queue_size, max_questions, max_answers, max_exports, max_imports)
@@ -113,7 +124,16 @@ advanced extension point for custom streams and optional Reseau TLS support.
 """
 function connect(transport::Transport; owns_transport::Bool = true, start_message_loop::Bool = true, options::ConnectionOptions = ConnectionOptions())
     isopen(transport) || throw(ConnectionFailedException("Transport is not open"))
-    conn = Connection(transport; owns_transport, inbound_queue_size = options.inbound_queue_size, outbound_queue_size = options.outbound_queue_size, max_questions = options.max_questions, max_answers = options.max_answers, max_exports = options.max_exports, max_imports = options.max_imports)
+    conn = Connection(
+        transport;
+        owns_transport,
+        inbound_queue_size = options.inbound_queue_size,
+        outbound_queue_size = options.outbound_queue_size,
+        max_questions = options.max_questions,
+        max_answers = options.max_answers,
+        max_exports = options.max_exports,
+        max_imports = options.max_imports,
+    )
     set_connected!(conn)
     start_message_loop && start_message_loop!(conn)
     return conn

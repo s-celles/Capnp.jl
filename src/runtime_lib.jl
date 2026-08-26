@@ -195,7 +195,13 @@ mutable struct BufferMessageReader <: Reader
     traversal_limit_words::Int
     nesting_limit::Int
 
-    function BufferMessageReader(buffer::Vector{UInt8}; max_message_size::Int = DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = DEFAULT_NESTING_LIMIT)
+    function BufferMessageReader(
+        buffer::Vector{UInt8};
+        max_message_size::Int = DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = DEFAULT_NESTING_LIMIT,
+    )
         _validate_reader_limits(max_message_size, max_segments)
         _validate_traversal_limits(traversal_limit_words, nesting_limit)
 
@@ -374,7 +380,7 @@ function alloc(builder::AllocMessageBuilder, pointer_location::WirePointer, size
         end
         resize!(builder.segments[builder.current_segment], next_size)
         # resize! does not zero-initialize newly allocated elements
-        fill!(@view(builder.segments[builder.current_segment][old_size+1:end]), 0x00)
+        fill!(@view(builder.segments[builder.current_segment][(old_size+1):end]), 0x00)
     end
 
     segment, offset = builder.current_segment, builder.current_offset
@@ -586,8 +592,7 @@ CompositeListPointer(traverser::T, segment::UInt32, offset::UInt32, length::UInt
 function validate_struct_pointer(ptr, minimum_data_words::Integer, minimum_pointer_words::Integer, type_name)
     ptr === nothing && return ptr
     ptr isa StructPointer || throw(InvalidMessageError("$type_name must be encoded as a struct pointer"))
-    ptr.data_word_count >= minimum_data_words && ptr.pointer_count >= minimum_pointer_words ||
-        throw(InvalidMessageError("$type_name struct is smaller than required by its schema"))
+    ptr.data_word_count >= minimum_data_words && ptr.pointer_count >= minimum_pointer_words || throw(InvalidMessageError("$type_name struct is smaller than required by its schema"))
     return ptr
 end
 
@@ -595,22 +600,19 @@ function validate_struct_list_pointer(ptr::ListPointer, minimum_data_words::Inte
     isempty(ptr) && return ptr
     ptr isa SimpleListPointer && return ptr
     ptr isa CompositeListPointer || throw(InvalidMessageError("$type_name list has an unsupported pointer representation"))
-    ptr.data_word_count >= minimum_data_words && ptr.pointer_count >= minimum_pointer_words ||
-        throw(InvalidMessageError("$type_name list elements are smaller than required by their schema"))
+    ptr.data_word_count >= minimum_data_words && ptr.pointer_count >= minimum_pointer_words || throw(InvalidMessageError("$type_name list elements are smaller than required by their schema"))
     return ptr
 end
 
 # [] operator
 function Base.getindex(ptr::SimpleListPointer{ElType,Traverser}, i) where {ElType<:CapnpType,Traverser<:MessageTraverser}
     1 <= i <= ptr.length || throw(BoundsError(ptr, i))
-    
+
     if is_capnp_bits(ElType)
         position = 8 * Int(ptr.offset) + (i - 1) * capnp_sizeof(ElType)
         return _checked_load(capnp_type_to_bits_type(ElType), ptr.traverser.segments, ptr.segment, position)
     elseif ptr.element_size == Pointer
-        pointer_container = StructPointer(
-            ptr.traverser, ptr.segment, UInt32(Int(ptr.offset) + (i - 1)), UInt16(0), UInt16(1), ptr.nesting_limit,
-        )
+        pointer_container = StructPointer(ptr.traverser, ptr.segment, UInt32(Int(ptr.offset) + (i - 1)), UInt16(0), UInt16(1), ptr.nesting_limit)
         if ElType === CapnpData
             return read_data(read_list_pointer(pointer_container, 0, 0, CapnpUInt8))
         elseif ElType === CapnpText
@@ -637,14 +639,14 @@ function Base.setindex!(ptr::SimpleListPointer{ElType,Traverser}, value, i) wher
         if ElType === CapnpText
             txt = String(value)
             pointer_location, segment, offset = alloc(ptr.traverser, pointer_location, length(txt) + 1)
-            child_ptr = SimpleListPointer{CapnpUInt8, typeof(ptr.traverser)}(ptr.traverser, segment, offset, Byte, UInt32(length(txt) + 1))
+            child_ptr = SimpleListPointer{CapnpUInt8,typeof(ptr.traverser)}(ptr.traverser, segment, offset, Byte, UInt32(length(txt) + 1))
             write_list_pointer(pointer_location, child_ptr)
             write_text(child_ptr, txt)
             return value
         elseif ElType === CapnpData
             data = value
             pointer_location, segment, offset = alloc(ptr.traverser, pointer_location, length(data))
-            child_ptr = SimpleListPointer{CapnpUInt8, typeof(ptr.traverser)}(ptr.traverser, segment, offset, Byte, UInt32(length(data)))
+            child_ptr = SimpleListPointer{CapnpUInt8,typeof(ptr.traverser)}(ptr.traverser, segment, offset, Byte, UInt32(length(data)))
             write_list_pointer(pointer_location, child_ptr)
             write_data(child_ptr, data)
             return value
@@ -677,7 +679,7 @@ function Base.iterate(ptr::SimpleListPointer{T}, state = 0) where {T<:CapnpType}
     if state >= ptr.length
         nothing
     else
-        return (ptr[state + 1], state + 1)
+        return (ptr[state+1], state + 1)
     end
 end
 
@@ -794,8 +796,7 @@ function read_list_pointer(ptr, byte_section_words, ptrix, element_type = CapnpV
             CompositeListPointer(ptr.traverser, segment, offset, tag.length, tag.data_word_count, tag.pointer_count, _descend_nesting_limit(ptr))
         else
             expected_size = _expected_element_size(element_type)
-            expected_size === nothing || element_type === CapnpVoid || element_size == expected_size ||
-                throw(InvalidMessageError("list element size $element_size does not match requested type $element_type"))
+            expected_size === nothing || element_type === CapnpVoid || element_size == expected_size || throw(InvalidMessageError("list element size $element_size does not match requested type $element_type"))
             byte_count = _simple_list_byte_count(element_size, list_size)
             _checked_byte_range(_checked_segment(ptr.traverser.segments, segment), 8 * offset, byte_count)
             _decrement_traversal_limit!(ptr.traverser, cld(byte_count, 8))
@@ -980,8 +981,7 @@ function read_any_pointer(ptr, byte_section_words, ptrix)
             _checked_byte_range(segment_bytes, 8 * offset, 8 * (Int(list_size) + 1))
             tag = read_list_tag(segment_bytes, offset)
             element_words = Int(tag.data_word_count) + Int(tag.pointer_count)
-            Int(tag.length) * element_words <= Int(list_size) ||
-                throw(InvalidMessageError("composite-list elements exceed the declared word count"))
+            Int(tag.length) * element_words <= Int(list_size) || throw(InvalidMessageError("composite-list elements exceed the declared word count"))
             _decrement_traversal_limit!(ptr.traverser, Int(list_size) + 1)
             return CompositeListPointer(ptr.traverser, segment, offset, tag.length, tag.data_word_count, tag.pointer_count, _descend_nesting_limit(ptr))
         end

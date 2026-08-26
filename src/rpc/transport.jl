@@ -123,7 +123,14 @@ mutable struct IOTransport{S} <: Transport
     read_lock::ReentrantLock
     write_lock::ReentrantLock
 
-    function IOTransport(stream::S; owns_stream::Bool = true, max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT) where {S}
+    function IOTransport(
+        stream::S;
+        owns_stream::Bool = true,
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+    ) where {S}
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
         new{S}(stream, owns_stream, isopen(stream), max_message_size, max_segments, traversal_limit_words, nesting_limit, ReentrantLock(), ReentrantLock())
@@ -159,14 +166,27 @@ mutable struct TcpTransport <: Transport
     read_lock::ReentrantLock
     write_lock::ReentrantLock
 
-    function TcpTransport(socket::TCPSocket; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT)
+    function TcpTransport(
+        socket::TCPSocket;
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+    )
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
         new(socket, isopen(socket), max_message_size, max_segments, traversal_limit_words, nesting_limit, ReentrantLock(), ReentrantLock())
     end
 end
 
-function TcpTransport(host::AbstractString, port::Integer; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT)
+function TcpTransport(
+    host::AbstractString,
+    port::Integer;
+    max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+    max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+    traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+    nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+)
     TcpTransport(Sockets.connect(host, port); max_message_size, max_segments, traversal_limit_words, nesting_limit)
 end
 
@@ -200,7 +220,13 @@ mutable struct UnixTransport{S} <: Transport
     read_lock::ReentrantLock
     write_lock::ReentrantLock
 
-    function UnixTransport(path::AbstractString; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT)
+    function UnixTransport(
+        path::AbstractString;
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+    )
         supports_unix_sockets() || throw(ArgumentError("Unix-domain sockets are not supported on this platform"))
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
@@ -208,7 +234,14 @@ mutable struct UnixTransport{S} <: Transport
         return new{typeof(socket)}(socket, isopen(socket), String(path), max_message_size, max_segments, traversal_limit_words, nesting_limit, ReentrantLock(), ReentrantLock())
     end
 
-    function UnixTransport(socket::S, path::AbstractString; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT) where {S}
+    function UnixTransport(
+        socket::S,
+        path::AbstractString;
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+    ) where {S}
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
         new{S}(socket, isopen(socket), String(path), max_message_size, max_segments, traversal_limit_words, nesting_limit, ReentrantLock(), ReentrantLock())
@@ -243,7 +276,12 @@ mutable struct MockTransport <: Transport
     traversal_limit_words::Int
     nesting_limit::Int
 
-    function MockTransport(; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT)
+    function MockTransport(;
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+    )
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
         new(Vector{UInt8}[], Vector{UInt8}[], true, max_message_size, max_segments, traversal_limit_words, nesting_limit)

@@ -12,14 +12,14 @@ end
 function main(args::Vector{String})::Cint
     try
         safe_println("Plain RPC App starting...")
-        
+
         server = RPC.Server(DummyCalculator())
         RPC.listen(server, "127.0.0.1", 0)
-        
+
         safe_println("Listening...")
         RPC.shutdown!(server)
         safe_println("Success")
-        
+
         return 0
     catch e
         safe_println("Error")

@@ -35,7 +35,7 @@ mutable struct PackedOutputStream <: IO
     inner::IO
     word_buffer::Vector{UInt8}  # Accumulate a word before packing
     word_pos::Int               # Current position in word buffer
-    
+
     # State for runs
     state::Symbol               # :neutral, :zero_run, :literal_run
     run_count::Int              # Number of additional words in the current run
@@ -97,7 +97,7 @@ function unpack_word!(s::PackedInputStream)
         fill!(s.buffer, 0x00)
         s.buffer_pos = 1
         s.buffer_len = 8
-        
+
         # In Cap'n proto packed encoding, a 0x00 tag is ALWAYS followed by a count byte
         count = read(s.inner, UInt8)
         s.zero_words_left = count
@@ -234,7 +234,7 @@ function Base.flush(s::PackedOutputStream)
         pack_word!(s)
         s.word_pos = 1
     end
-    
+
     # Flush any active runs
     if s.state == :zero_run
         write(s.inner, UInt8(0x00))
@@ -252,7 +252,7 @@ function Base.flush(s::PackedOutputStream)
         s.state = :neutral
         s.run_count = 0
     end
-    
+
     flush(s.inner)
 end
 

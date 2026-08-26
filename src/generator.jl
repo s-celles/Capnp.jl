@@ -29,7 +29,8 @@ function generate(request::CodeGeneratorRequest)
         # Generate recursively with file node at the root of the tree
         generateNode(env, file_node)
 
-        mkpath(dirname(file.filename * ".jl")); open(file.filename * ".jl", "w") do io
+        mkpath(dirname(file.filename * ".jl"))
+        open(file.filename * ".jl", "w") do io
             println(io, String(take!(env.buffer)))
         end
     end
@@ -649,7 +650,7 @@ function generateSlotField(env, node::Node{StructNodeProps}, field::Field{SlotFi
         cprintln(env, "    Base.depwarn(\"$(node.jlName)_init$(uppercasefirst(field.name)) is deprecated, use init_$(field_snake)!(ptr, size, Val{:$(node.jlName)}) instead\", :$(node.jlName)_init$(uppercasefirst(field.name)))")
         cprintln(env, "    init_$(field_snake)!(ptr, size, Val{:$(node.jlName)})")
         cprintln(env, "end")
-    elseif field.fieldProperties.type.elementType isa Union{SchemaText, SchemaData, SchemaList, SchemaAnyPointer, SchemaInterface}
+    elseif field.fieldProperties.type.elementType isa Union{SchemaText,SchemaData,SchemaList,SchemaAnyPointer,SchemaInterface}
         # New API: init
         cprintln(env, "function init_$(field_snake)!(ptr, size, ::Type{Val{:$(node.jlName)}})")
         cprintln(env, "    pointer_location = Capnp.WirePointer(ptr.segment, ptr.offset + ptr.data_word_count + $(field.fieldProperties.offset))")

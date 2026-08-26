@@ -50,8 +50,7 @@ struct ResourceLimitError <: Exception
     limit::Int
 end
 
-Base.showerror(io::IO, error::ResourceLimitError) =
-    print(io, "RPC resource limit exceeded for ", error.resource, " (limit ", error.limit, ")")
+Base.showerror(io::IO, error::ResourceLimitError) = print(io, "RPC resource limit exceeded for ", error.resource, " (limit ", error.limit, ")")
 
 function _validate_connection_limits(inbound_queue_size::Int, outbound_queue_size::Int, max_questions::Int, max_answers::Int, max_exports::Int, max_imports::Int)
     inbound_queue_size > 0 || throw(ArgumentError("inbound_queue_size must be positive"))
@@ -242,7 +241,7 @@ mutable struct Connection
     max_exports::Int
     max_imports::Int
 
-    function Connection(transport::Transport; owns_transport::Bool = true, inbound_queue_size::Int = 64, outbound_queue_size::Int = 64, max_questions::Int=1024, max_answers::Int=1024, max_exports::Int=8192, max_imports::Int=8192)
+    function Connection(transport::Transport; owns_transport::Bool = true, inbound_queue_size::Int = 64, outbound_queue_size::Int = 64, max_questions::Int = 1024, max_answers::Int = 1024, max_exports::Int = 8192, max_imports::Int = 8192)
         _validate_connection_limits(inbound_queue_size, outbound_queue_size, max_questions, max_answers, max_exports, max_imports)
         new(
             transport,

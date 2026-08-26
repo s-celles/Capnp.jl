@@ -86,7 +86,18 @@ println(stderr, "RUNNING TESTSET: ");
 
         println(stderr, "RUNNING TESTSET: ")
         @testset "Connection options" begin
-            options = RPC.ConnectionOptions(max_message_size = 1024, max_segments = 8, traversal_limit_words = 256, nesting_limit = 12, inbound_queue_size = 4, outbound_queue_size = 5, max_questions = 6, max_answers = 7, max_exports = 8, max_imports = 9)
+            options = RPC.ConnectionOptions(
+                max_message_size = 1024,
+                max_segments = 8,
+                traversal_limit_words = 256,
+                nesting_limit = 12,
+                inbound_queue_size = 4,
+                outbound_queue_size = 5,
+                max_questions = 6,
+                max_answers = 7,
+                max_exports = 8,
+                max_imports = 9,
+            )
             @test options.max_message_size == 1024
             @test options.max_segments == 8
             @test options.traversal_limit_words == 256

@@ -17,7 +17,13 @@ mutable struct ReseauTransport{S} <: Capnp.RPC.Transport
     read_lock::ReentrantLock
     write_lock::ReentrantLock
 
-    function ReseauTransport(socket::S; max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE, max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS, traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS, nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT) where {S}
+    function ReseauTransport(
+        socket::S;
+        max_message_size::Int = Capnp.DEFAULT_MAX_MESSAGE_SIZE,
+        max_segments::Int = Capnp.DEFAULT_MAX_SEGMENTS,
+        traversal_limit_words::Int = Capnp.DEFAULT_TRAVERSAL_LIMIT_WORDS,
+        nesting_limit::Int = Capnp.DEFAULT_NESTING_LIMIT,
+    ) where {S}
         Capnp._validate_reader_limits(max_message_size, max_segments)
         Capnp._validate_traversal_limits(traversal_limit_words, nesting_limit)
         return new{S}(socket, true, max_message_size, max_segments, traversal_limit_words, nesting_limit, ReentrantLock(), ReentrantLock())
@@ -66,10 +72,10 @@ end
 
 # Implement connect for TLSConfig
 function Capnp.RPC.connect(host::AbstractString, port::Integer, tls_config::RPC.TLSConfig; options::RPC.ConnectionOptions = RPC.ConnectionOptions())
-    cache13c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ClientSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS13ClientSession}(), String[], 64)
-    cache13s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ServerSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS13ServerSession}(), String[], 64)
-    cache12c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ClientSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS12ClientSession}(), String[], 64)
-    cache12s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ServerSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS12ServerSession}(), String[], 64)
+    cache13c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ClientSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS13ClientSession}(), String[], 64)
+    cache13s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ServerSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS13ServerSession}(), String[], 64)
+    cache12c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ClientSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS12ClientSession}(), String[], 64)
+    cache12s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ServerSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS12ServerSession}(), String[], 64)
     config = Reseau.TLS.Config(
         tls_config.sni !== nothing ? (tls_config.sni::String) : String(host),
         tls_config.verify_host::Bool,
@@ -86,9 +92,12 @@ function Capnp.RPC.connect(host::AbstractString, port::Integer, tls_config::RPC.
         nothing,
         false,
         Reseau.TLS._TLSSessionTicketKeyState(),
-        cache13c, cache13s, cache12c, cache12s,
+        cache13c,
+        cache13s,
+        cache12c,
+        cache12s,
         Reseau.TLS._TLSLocalIdentityState(),
-        Reseau.TLS._TLSLocalIdentityState()
+        Reseau.TLS._TLSLocalIdentityState(),
     )
 
     # Reseau.TLS.connect accepts an address string in the format "host:port"
@@ -107,10 +116,10 @@ end
 # Implement listen for TLSListenerConfig
 function Capnp.RPC.listen(server::RPC.Server, host::AbstractString, port::Integer, tls_config::RPC.TLSListenerConfig)
     client_auth = tls_config.require_client_cert ? Reseau.TLS.ClientAuthMode.RequireAndVerifyClientCert : Reseau.TLS.ClientAuthMode.NoClientCert
-    cache13c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ClientSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS13ClientSession}(), String[], 64)
-    cache13s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ServerSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS13ServerSession}(), String[], 64)
-    cache12c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ClientSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS12ClientSession}(), String[], 64)
-    cache12s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ServerSession}(ReentrantLock(), Dict{String, Reseau.TLS._TLS12ServerSession}(), String[], 64)
+    cache13c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ClientSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS13ClientSession}(), String[], 64)
+    cache13s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS13ServerSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS13ServerSession}(), String[], 64)
+    cache12c = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ClientSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS12ClientSession}(), String[], 64)
+    cache12s = Reseau.TLS._TLSSessionCache{Reseau.TLS._TLS12ServerSession}(ReentrantLock(), Dict{String,Reseau.TLS._TLS12ServerSession}(), String[], 64)
     config = Reseau.TLS.Config(
         nothing,
         false,
@@ -127,9 +136,12 @@ function Capnp.RPC.listen(server::RPC.Server, host::AbstractString, port::Intege
         nothing,
         false,
         Reseau.TLS._TLSSessionTicketKeyState(),
-        cache13c, cache13s, cache12c, cache12s,
+        cache13c,
+        cache13s,
+        cache12c,
+        cache12s,
         Reseau.TLS._TLSLocalIdentityState(),
-        Reseau.TLS._TLSLocalIdentityState()
+        Reseau.TLS._TLSLocalIdentityState(),
     )
 
     listener = Reseau.TCP.listen("tcp", "$host:$port")

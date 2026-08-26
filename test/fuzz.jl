@@ -9,9 +9,9 @@ if !isdefined(Main, :ListsSchema)
     else
         run(pipeline(`capnp compile -o- test/lists.capnp`, `julia --project capnpc-jl`))
     end
-    
+
     @eval module ListsSchema
-        include("lists.capnp.jl")
+    include("lists.capnp.jl")
     end
 end
 
@@ -25,29 +25,29 @@ end
         end
         buffer = IOBuffer()
         Capnp.writeMessageToStream(builder, buffer)
-        
+
         # Add an elementary message
         builder2 = Capnp.AllocMessageBuilder()
         writer2 = ElementarySchema.init_root!(builder2, Val{:Test})
         ElementarySchema.set_signed64!(writer2, -42, Val{:Test})
         buffer2 = IOBuffer()
         Capnp.writeMessageToStream(builder2, buffer2)
-        
+
         return [take!(buffer), take!(buffer2)]
     end
 
     valid_messages = generate_valid_message_bytes()
 
     Random.seed!(42)
-    for _ in 1:2000
+    for _ = 1:2000
         valid_bytes = rand(valid_messages)
         bytes = copy(valid_bytes)
         mutations = rand(1:5)
-        for _ in 1:mutations
+        for _ = 1:mutations
             op = rand(1:4)
             if op == 1 # truncate
                 if length(bytes) > 0
-                    resize!(bytes, rand(0:length(bytes)-1))
+                    resize!(bytes, rand(0:(length(bytes)-1)))
                 end
             elseif op == 2 # flip a bit
                 if length(bytes) > 0
@@ -67,14 +67,14 @@ end
 
         try
             reader = Capnp.MessageReader(IOBuffer(bytes))
-            
+
             # Try to read as ListTest
             list_value = ListsSchema.root(reader, Val{:ListTest})
             int_reader = ListsSchema.get_ints(list_value, Val{:ListTest})
-            for i in 1:length(int_reader)
+            for i = 1:length(int_reader)
                 _ = int_reader[i]
             end
-            
+
             # Try to read as ElementaryTest
             # We'll just read raw bits from the struct root.
             root_ptr = Capnp.StructPointer(reader, UInt32(1), UInt32(0), UInt16(0), UInt16(1))
