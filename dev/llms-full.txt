@@ -49,7 +49,7 @@ Capnp.writeMessageToStream(message, stdout)
 ```
 
 !!! warning
-    The current reader has bounded message framing and checked pointer accesses, but traversal and nesting budgets are not yet enforced. Treat RPC and untrusted-message processing as experimental.
+    The reader bounds message framing, checks every pointer access, and enforces traversal-word and nesting budgets. The RPC layer, however, has not yet been through the performance, observability, and release-readiness work tracked in the roadmap; treat it as experimental.
 
 
 ---
@@ -63,18 +63,32 @@ Capnp.writeMessageToStream(message, stdout)
 - Cap'n Proto stream framing and multiple segments
 - Structs, primitive fields, lists, text, and capability pointers
 - Default-value XOR handling
-- Basic packed encoding
+- Packed encoding, including zero-word and literal-word run optimization
 - Generic schema metadata and Julia code generation
 - Preallocated buffer readers and builders
 
+## Bounded reads
+
+Readers enforce message-size, segment-count, traversal-word, and nesting limits
+on untrusted input, defaulting to 8 Mi words and 64 levels of nesting as the
+reference implementation does. Malformed messages raise `InvalidMessageError`
+rather than aborting or allocating without bound.
+
+## RPC
+
+- Typed bootstrap, generated client calls, and generated server dispatch
+- Promise pipelining and promised-answer transforms
+- TCP, Unix-domain, and IO-backed transports, plus TLS/mTLS when Reseau.jl is
+  loaded
+
 ## Experimental or incomplete
 
-- Generated RPC client calls and promise pipelining
 - Complete handling of every RPC message variant
-- Two-word far-pointer landing-pad generation
-- Packed zero and literal run optimization
-- Traversal and nesting budgets for hostile object graphs
+- Third-party hosted capabilities (RPC level 3)
+- Two-word far-pointer landing-pad generation, which is validated on read but
+  not produced by the writer
 - End-to-end interoperability coverage across supported Cap'n Proto versions
+- Benchmarks, tracked performance baselines, and structured tracing
 
 The package remains pre-1.0, so generated APIs may still change.
 
@@ -105,7 +119,10 @@ Capnp.BindingKind
 
 # Experimental RPC types
 
-The RPC layer is incomplete. See [Supported functionality](@ref) before relying on it.
+Bootstrap, generated calls, and promise pipelining work end to end, but the RPC
+layer is still pre-production: some message variants, third-party hosted
+capabilities, and the performance and tracing work remain. See
+[Supported functionality](@ref) before relying on it.
 
 ```@autodocs
 Modules = [Capnp.RPC]
