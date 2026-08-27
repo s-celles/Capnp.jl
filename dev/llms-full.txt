@@ -78,6 +78,8 @@ rather than aborting or allocating without bound.
 
 - Typed bootstrap, generated client calls, and generated server dispatch
 - Promise pipelining and promised-answer transforms
+- Reference equality for capabilities received from the same peer: two
+  references to one import compare equal, and hash alike
 - TCP, Unix-domain, and IO-backed transports, plus TLS/mTLS when Reseau.jl is
   loaded
 
@@ -94,7 +96,6 @@ capabilities received from the same peer.
 ## Experimental or incomplete
 
 - Complete handling of every RPC message variant
-- Documented equality semantics for capabilities received from the same peer
 - Two-word far-pointer landing-pad generation, which is validated on read but
   not produced by the writer
 - End-to-end interoperability coverage across supported Cap'n Proto versions
@@ -129,11 +130,11 @@ Capnp.BindingKind
 
 # Experimental RPC types
 
-Bootstrap, generated calls, and promise pipelining work end to end, covering
-RPC levels 1 and 2 on the two-party network. The layer is still pre-production
-all the same: some message variants, documented capability equality, and the
-performance and tracing work remain. See [Supported functionality](@ref) before
-relying on it.
+Bootstrap, generated calls, promise pipelining, and reference equality for
+capabilities from one peer work end to end, covering RPC levels 1 and 2 on the
+two-party network. The layer is still pre-production all the same: some message
+variants, and the performance and tracing work, remain. See
+[Supported functionality](@ref) before relying on it.
 
 ```@autodocs
 Modules = [Capnp.RPC]
