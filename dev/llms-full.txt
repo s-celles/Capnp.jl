@@ -81,10 +81,20 @@ rather than aborting or allocating without bound.
 - TCP, Unix-domain, and IO-backed transports, plus TLS/mTLS when Reseau.jl is
   loaded
 
+Capnp.jl targets the two-party network type. On that network, RPC levels 1 and
+2 are the complete target: `rpc.capnp` states that level 3 is irrelevant for
+two-party implementations, and level 4 reduces to reference equality between
+capabilities received from the same peer.
+
+## Out of scope
+
+- RPC level 3, three-party handoff, and any vat network protocol beyond the
+  two-party type
+
 ## Experimental or incomplete
 
 - Complete handling of every RPC message variant
-- Third-party hosted capabilities (RPC level 3)
+- Documented equality semantics for capabilities received from the same peer
 - Two-word far-pointer landing-pad generation, which is validated on read but
   not produced by the writer
 - End-to-end interoperability coverage across supported Cap'n Proto versions
@@ -119,10 +129,11 @@ Capnp.BindingKind
 
 # Experimental RPC types
 
-Bootstrap, generated calls, and promise pipelining work end to end, but the RPC
-layer is still pre-production: some message variants, third-party hosted
-capabilities, and the performance and tracing work remain. See
-[Supported functionality](@ref) before relying on it.
+Bootstrap, generated calls, and promise pipelining work end to end, covering
+RPC levels 1 and 2 on the two-party network. The layer is still pre-production
+all the same: some message variants, documented capability equality, and the
+performance and tracing work remain. See [Supported functionality](@ref) before
+relying on it.
 
 ```@autodocs
 Modules = [Capnp.RPC]
