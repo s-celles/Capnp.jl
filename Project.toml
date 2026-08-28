@@ -1,13 +1,30 @@
 name = "Capnp"
-uuid = "4a176cb5-e787-4417-92d8-5e07a66a639e"
-authors = ["Ondrej Slamecka <ondrej@slamecka.cz>"]
-version = "0.1.2"
+uuid = "b5c95173-5a77-49d3-b7f3-d0bfa1b96fb4"
+version = "0.2.0"
+authors = ["Sébastien Celles <s.celles@gmail.com>", "Ondrej Slamecka <ondrej@slamecka.cz> (original author, not a maintainer of this fork)"]
+
+[deps]
+Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
+
+[weakdeps]
+Reseau = "802f3686-a58f-41ce-bb0c-3c43c75bba36"
+
+[extensions]
+CapnpReseauExt = "Reseau"
+
+[compat]
+Aqua = "0.8"
+Random = "1.10"
+Reseau = "1"
+Sockets = "1.10"
+Test = "1.10"
+julia = "1.10"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Reseau = "802f3686-a58f-41ce-bb0c-3c43c75bba36"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
-
-[compat]
-julia = "^1.6"
+test = ["Aqua", "Random", "Reseau", "Test"]

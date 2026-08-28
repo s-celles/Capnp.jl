@@ -1,0 +1,5 @@
+# Generated Julia code is compared byte for byte against the golden references
+# in test/goldens/. Keep LF in the working tree on every platform, otherwise a
+# Windows checkout rewrites the committed references to CRLF and the comparison
+# fails against freshly generated LF output.
+*.capnp.jl text eol=lf

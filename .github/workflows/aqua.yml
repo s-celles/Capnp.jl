@@ -1,0 +1,48 @@
+# Aqua also runs at the end of test/runtests.jl. It gets its own job because
+# that is the last line of a 226-line suite: any earlier failure hides it, and
+# a missing compat bound went unnoticed for exactly that reason. Aqua needs
+# neither the capnp compiler nor the C++ fixtures, so running it alone takes
+# seconds instead of waiting behind them.
+name: Aqua
+
+on:
+  push:
+    branches:
+      - main
+      - 'release-*'
+    tags: '*'
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: aqua-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  aqua:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3
+        with:
+          # Latest stable rather than the 1.10 floor: ambiguity and persistent
+          # task checks are the ones most likely to grow, and the suite already
+          # runs Aqua on 1.10.
+          version: '1'
+          arch: x64
+      - uses: julia-actions/cache@a7bed9df697e5d7309d68afe7542a87621a8b6c8 # v3.3.0
+      - name: Run Aqua
+        # A temporary environment keeps Project.toml untouched, while pinning
+        # Aqua to the same bound the test target declares.
+        run: |
+          julia -e '
+            using Pkg
+            Pkg.activate(temp=true)
+            Pkg.develop(path=".")
+            Pkg.add(PackageSpec(name="Aqua", version="0.8"))
+            using Capnp, Aqua
+            Aqua.test_all(Capnp)'

@@ -1,1 +1,5 @@
 margin = 240
+ignore = [
+    "**/*.capnp.jl",
+    "test/goldens/*.jl"
+]
